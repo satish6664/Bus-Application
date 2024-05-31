@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .checked {
+  color: orange;
+}
+        #options {
+        display: none;
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    #options li {
+        list-style-type: none;
+        padding: 5px;
+        cursor: pointer;
+    }
+    #options li:hover {
+        background-color: #f0f0f0;
+    }
+        .seat {
+            border: 2px solid #CBD5E0;
+            border-radius: 4px;
+            width: 90px;
+            padding: 8px;
+            margin: 4px;
+            /* background-color: #F3F4F6; */
+        }
+
+        .seatclass {
+            width: 45px;
+            border: 2px solid #CBD5E0;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 4px;
+        }
+
+        .space {
+            width: 30px;
+            margin-top: 10px;
+            margin-right: 6px;
+        }
+
+        .empty {
+            width: 40px;
+            margin: 4px;
+        }
+
+        .emptyclass {
+            width: 110px;
+        }
+
+        .popup {
+            position: absolute;
+            background-color: #000;
+            color: #fff;
+            padding: 5px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #BgImage {
+            width: 100%;
+            height: 100vh;
+            background-color: rgb(250, 250, 250);
+            /* background-image: url('https://us.123rf.com/450wm/bearok/bearok1802/bearok180201985/96410610-blurred-photo-of-bus-on-the-road.jpg?ver=6'); */
+            /* Replace 'your-image-url.jpg' with the path to your image */
+            /* https://us.123rf.com/450wm/bearok/bearok1802/bearok180201985/96410610-blurred-photo-of-bus-on-the-road.jpg?ver=6 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+
+            /* opacity: 0.5; */
+
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100" id="BgImage">
+    <header class="text-gray-900 py-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <div class="text-2xl font-bold">Go Bus</div>
+        <nav>
+            <ul class="flex space-x-6">
+                <li><a href="#" class="hover:text-gray-300">About</a></li>
+                <li><a href="#" class="hover:text-gray-300">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+    <!-- User details modal -->
+    <div id="userDetailsModal"
+        class="fixed top-0 left-0 h-full w-full flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white px-8 pt-8 rounded-lg w-2/5 flex flex-col justify-center">
+            <div class="flex justify-between">
+                <span class="text-gray-600 cursor-pointer text-2xl" onclick="HideModal()">&larr;</span>
+                <span class="text-gray-600 cursor-pointer text-2xl" onclick="closeUserDetailsModal()">&times;</span>
+            </div>
+            <div class="text-2xl mb-4 shadow-lg rounded-lg bg-gray-100">
+                <div class="pl-8 pt-4">
+                    <p id="BookDate" class="text-sm"></p>
+                </div>
+                <div class="flex justify-between px-8 py-4 ">
+                    <div>
+                        <p id="DetailsFrom"></p>
+                        <p class="text-sm" id="FromTime"></p>
+                    </div>
+                    <div>
+                        <p id="DetailsTo"></p>
+                        <p class="text-sm" id="ToTime"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-8 mb-8 rounded-lg w-full flex flex-col justify-center shadow-lg rounded-lg">
+                <h4 class="text-xl font-semibold mb-4">Enter Passenger Details</h4>
+                <form id="userDetailsForm" onsubmit="openPaymentForm(event)">
+                    <div class="mb-4">
+                        <div class="mb-4" id="passengerone">
+                            <h6 class="text-xs">Passenger 1</h6>
+                            <input type="text" id="name" name="name" placeholder="Name" required
+                                class="input-field border-2">
+                            <select id="gender" name="gender" required class="input-field border-2 w-2/5 ml-3">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-4" id="passengertwo">
+                            <h6 class="text-xs">Passenger 2</h6>
+                            <input type="text" id="name1" name="name1" placeholder="Name" class="input-field border-2">
+                            <select id="gender1" name="gender1" class="input-field border-2 w-2/5 ml-3">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-4" id="passengerthree">
+                            <h6 class="text-xs">Passenger 3</h6>
+                            <input type="text" id="name2" name="name2" placeholder="Name" class="input-field border-2">
+                            <select id="gender2" name="gender2" class="input-field border-2 w-2/5 ml-3">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-4" id="passengerfour">
+                            <h6 class="text-xs">Passenger 4</h6>
+                            <input type="text" id="name3" name="name3" placeholder="Name" class="input-field border-2">
+                            <select id="gender3" name="gender3" class="input-field border-2 w-2/5 ml-3">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <!-- <input type="text" id="age" name="age" placeholder="Age" required class="input-field border-2"> -->
+                            <input type="tel" id="phone" name="phone" placeholder="Phone" required
+                                class="input-field border-2">
+                            <input type="email" id="email" name="email" placeholder="Email" required
+                                class="input-field border-2 ml-3">
+
+                        </div>
+                        <div class="mb-4">
+                            <!-- <input type="email" id="email" name="email" placeholder="Email" required class="input-field border-2"> -->
+                        </div>
+                    </div>
+                    <div id="PriceBooking" class="flex justify-between pt-8">
+                        <div>
+                            <p class="text-xs">Total price</p>
+                            <h3 class="text-xl"><span id="totalPriceBooking"></span></h3>
+                        </div>
+                        <div class="w-18">
+                            <button type="submit" id="ButtonPay"
+                                class="py-2 px-4 rounded w-full" style="border:solid black 1px;">Proceed to
+                                Payment</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="paymentSection" class="hidden p-8">
+                <!-- Hardcoded payment form goes here -->
+                <h4 class="text-xl font-semibold mb-4">Choose Payment</h4>
+                <div class="mb-8">
+                    <label class="p-4"><input type="radio" name="paymentOption" value="Credit card"
+                            onchange="showPaymentDetails('Credit Card')"> Credit Card</label>
+                    <label class="p-4"><input type="radio" name="paymentOption" value="Debit Card"
+                            onchange="showPaymentDetails('Debit Card')"> Debit Card</label>
+                    <label class="p-4"><input type="radio" name="paymentOption" value="UPI"
+                            onchange="showPaymentDetails('UPI')"> UPI</label>
+                </div>
+                <div id="creditCardDetails" class="hidden mb-8">
+                    <!-- Credit card details -->
+                    <input class="p-1" type="text" id="cardholderName" placeholder="Cardholder Name" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="cardNumber" placeholder="Card Number" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="expiryDate" placeholder="Expiry Date (MM/YYYY)" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="cvv" placeholder="CVV" required class="input-field border-2">
+                </div>
+                <div id="debitCardDetails" class="hidden mb-8">
+                    <!-- Debit card details -->
+                    <input class="p-1" type="text" id="debitCardholderName" placeholder="Cardholder Name" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="debitCardNumber" placeholder="Card Number" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="debitExpiryDate" placeholder="Expiry Date (MM/YYYY)" required
+                        class="input-field border-2">
+                    <input class="p-1" type="text" id="debitCvv" placeholder="CVV" required
+                        class="input-field border-2">
+                </div>
+                <div id="upiDetails" class="hidden mb-8">
+                    <!-- UPI details -->
+                    <input class="p-1" type="text" id="upiId" placeholder="UPI ID" required
+                        class="input-field border-2">
+                </div>
+                <div class="flex justify-between">
+                    <div>
+                        <div>
+                            <p class="text-xs">Total price</p>
+                            <h3 class="text-xl"><span id="PriceBookingTwo"></span></h3>
+                        </div>
+                    </div>
+                    <div> <button type="button" onclick="postData()"
+                            class="py-2 px-4 rounded" style="border:solid black 1px;">Process Payment</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="BgContent">
+        <div id="myModal"
+            class="modal fixed top-0 left-0 flex items-center justify-center w-full h-full bg-black bg-opacity-50 hidden">
+            <div class="h-full" style="display: flex; justify-content: center; align-items: center;">
+                <div class=" bg-white rounded">
+                    <span class="close pr-8 pt-4">&times;</span>
+                    <!-- Modal content goes here -->
+                    <div class="px-4 py-8">
+                        <div class="p-4 text-lg">
+                            <p class="text-cyan-950">Select seats</p>
+                        </div>
+                        <div class="flex">
+                            <div class="pl-8 w-1/2">Lower Seats</div>
+                            <div class="pl-12 w-1/2">Upper Berths</div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div class="bg-gray-200 p-4 m-8 rounded-md">
+                                <!-- First Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"><img src="https://cdn-icons-png.flaticon.com/512/2/2087.png"
+                                            alt=""></div>
+                                    <div class="seatclass bg-gray-50" id="A1" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'A1', '599')">A1
+                                        <div class="popup" id="priceA1">Price: 20$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="B1" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'B1', '599')">B1
+                                        <div class="popup" id="priceB1">Price: 25$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="C1" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'C1', '599')">C1
+                                        <div class="popup" id="priceC1">Price: 30$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="D1" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'D1', '599')">D1
+                                        <div class="popup" id="priceD1">Price: 35$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="E1" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'E1', '599')">E1
+                                        <div class="popup" id="priceA1">Price: 20$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="F1" onmouseover="showPrice(event, '₹ 499')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'F1', '499')">F1
+                                        <div class="popup" id="priceB1">Price: 25$</div>
+                                    </div>
+
+                                </div>
+                                <!-- Second Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"></div>
+                                    <div class="seatclass bg-gray-50" id="A2" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'A2', '599')">A2
+                                        <div class="popup" id="priceA2">Price: 40$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="B2" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'B2', '599')">B2
+                                        <div class="popup" id="priceB2">Price: 45$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="C2" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'C2', '599')">C2
+                                        <div class="popup" id="priceC2">Price: 50$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="D2" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'D2', '599')">D2
+                                        <div class="popup" id="priceD2">Price: 55$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="E2" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'E2', '599')">E2
+                                        <div class="popup" id="priceA1">Price: 20$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="F2" onmouseover="showPrice(event, '₹ 499')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'F2', '499')">F2
+                                        <div class="popup" id="priceB1">Price: 25$</div>
+                                    </div>
+
+                                </div>
+                                <!-- Empty Space -->
+                                <div class="h-6"></div>
+                                <!-- Third Row (Empty) -->
+                                <div class="flex justify-between">
+                                    <div class="emptyclass"></div>
+                                    <div class="emptyclass"></div>
+                                    <div class="emptyclass"></div>
+                                    <div class="emptyclass"></div>
+                                </div>
+                                <!-- Fourth Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"></div>
+                                    <div class="seatclass bg-gray-50" id="A3" onmouseover="showPrice(event, '₹ 699')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'A3', '699')">A3
+                                        <div class="popup" id="priceA3">Price: 60$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="B3" onmouseover="showPrice(event, '₹ 699')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'B3', '699')">B3
+                                        <div class="popup" id="priceB3">Price: 65$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="C3" onmouseover="showPrice(event, '₹ 699')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'C3', '699')">C3
+                                        <div class="popup" id="priceC3">Price: 70$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="D3" onmouseover="showPrice(event, '₹ 699')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'D3', '699')">D3
+                                        <div class="popup" id="priceD3">Price: 75$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="E3" onmouseover="showPrice(event, '₹ 699')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'E3', '699')">E3
+                                        <div class="popup" id="priceA1">Price: 20$</div>
+                                    </div>
+                                    <div class="seatclass bg-gray-50" id="F3" onmouseover="showPrice(event, '₹ 599')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'F3', '599')">F3
+                                        <div class="popup" id="priceB1">Price: 25$</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="relative bg-gray-200 p-4 m-8 rounded-md">
+                                <!-- First Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"><img src="https://cdn-icons-png.flaticon.com/512/2/2087.png"
+                                            alt=""></div>
+                                    <div class="seat bg-gray-50" id="U1" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U1', '899')">U1
+                                        <div class="popup" id="priceA1">Price: 20$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U4" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U4', '899')">U4
+                                        <div class="popup" id="priceB1">Price: 25$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U7" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U7', '899')">U7
+                                        <div class="popup" id="priceC1">Price: 30$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U10" onmouseover="showPrice(event, '₹ 799')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U10', '799')">U10
+                                        <div class="popup" id="priceD1">Price: 35$</div>
+                                    </div>
+                                </div>
+                                <!-- Second Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"></div>
+                                    <div class="seat bg-gray-50" id="U2" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U2', '899')">U2
+                                        <div class="popup" id="priceA2">Price: 40$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U5" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U5', '899')">U5
+                                        <div class="popup" id="priceB2">Price: 45$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U8" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U8', '899')">U8
+                                        <div class="popup" id="priceC2">Price: 50$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U11" onmouseover="showPrice(event, '₹ 799')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U11', '799')">U11
+                                        <div class="popup" id="priceD2">Price: 55$</div>
+                                    </div>
+                                </div>
+                                <!-- Empty Space -->
+                                <div class="h-6"></div>
+                                <!-- Third Row (Empty) -->
+                                <div class="flex justify-between">
+                                    <div class="empty"></div>
+                                    <div class="empty"></div>
+                                    <div class="empty"></div>
+                                    <div class="empty"></div>
+                                </div>
+                                <!-- Fourth Row -->
+                                <div class="flex justify-between">
+                                    <div class="space"></div>
+                                    <div class="seat bg-gray-50" id="U3" onmouseover="showPrice(event, '₹ 999')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U3', '999')">U3
+                                        <div class="popup" id="priceA3">Price: 60$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U6" onmouseover="showPrice(event, '₹ 999')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U6', '999')">U6
+                                        <div class="popup" id="priceB3">Price: 65$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U9" onmouseover="showPrice(event, '₹ 999')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U9', '999')">U9
+                                        <div class="popup" id="priceC3">Price: 70$</div>
+                                    </div>
+                                    <div class="seat bg-gray-50" id="U12" onmouseover="showPrice(event, '₹ 899')"
+                                        onmouseout="hidePrice(event)" onclick="toggleSeat(event, 'U12', '899')">U12
+                                        <div class="popup" id="priceD3">Price: 75$</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex relative ml-4">
+                            <div id="selectedSeatsAndPriceDiv" class="w-1/2 px-4">
+                                <p class="text-cyan-950">Selected Seats:</p>
+                                <ul id="selectedSeatsList"></ul>
+                            </div>
+                            <div class="w-1/2 px-8 ml-4" id="PriceDiv">
+                                <p>Total Price: <span id="totalPrice">0$</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <div id="AtleastMsg" class="text-xs text-red-900 relative pl-8 font-bold">Select atleast 1
+                                seat to continue</div>
+                            <div class="flex">
+                                <div class="w-4/5"> </div>
+                                <button onclick="openUserDetailsModal()"
+                                    class="font-bold py-2 px-4 rounded mt-4 block" style="border:solid black 1px;">Continue
+                                    to Book</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div>
+            <img class="w-full opacity-75" src="https://us.123rf.com/450wm/viktorijareut/viktorijareut1811/viktorijareut181100142/112407340-white-tourist-bus-driving-on-the-road-vector-illustration-mountain-landscape-or-background-bus.jpg" alt="">
+        </div> -->
+        <section class="py-16">
+        <div class="container bg-orange-200 mx-auto bg-white rounded-md shadow-sm flex justify-center">
+            <div class="flex flex-wrap justify-between ">
+                <div class="w-full md:w-auto p-6">
+                    <h2 class="text-lg font-semibold mb-4">Find Your Bus</h2>
+                    <form id="searchForm" class="flex flex-wrap items-center space-y-4 md:space-y-0 mb-8 md:space-x-4">
+                        <div class="w-full md:w-40">
+                            <input class="form-select block w-full px-4 py-2 border border-gray-300 rounded-md" type="text" id="from" placeholder="From" oninput="filterOptions('from')" onfocus="showAllOptions('from')" >
+                        </div>
+                        <div class="w-full md:w-40">
+                            <input class="form-select block w-full px-4 py-2 border border-gray-300 rounded-md" type="text" id="to" placeholder="To" oninput="filterOptions('to')" onfocus="showAllOptions('to')" >
+                        </div>
+                        <div class="w-full md:w-40">
+                            <input type="date" id="date"
+                                class="form-input block w-full px-4 py-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="w-full md:w-auto">
+                            <button type="button" id="todayBtn"
+                                class="px-4 py-2 bg-gray-800 text-white rounded-md">Today</button>
+                        </div>
+                        <div class="w-full md:w-auto">
+                            <button type="submit" id="tomorrowBtn"
+                                class="px-4 py-2 bg-gray-800 text-white rounded-md">Tomorrow</button>
+                        </div>
+                        <div class="w-full md:w-auto">
+                            <button type="button" onclick="Calling(event)" id="searchBtn"
+                                class="px-4 py-2 bg-gray-800 text-white rounded-md">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <ul id="options" class="container bg-orange-200 mx-auto bg-white rounded-md shadow-sm flex justify-center"></ul>
+        </section>
+        <div class="m-24" id="noBus">
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+                    <div class="text-center">
+                        <img src="https://cdni.iconscout.com/illustration/premium/thumb/error-8694026-6983265.png?f=webp"
+                            alt="" class="w-32 mx-auto">
+                        <div class="mt-4 text-xl font-bold">Oops!</div>
+                        <div class="text-gray-600">There are no services on this route for the selected date.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="busgrid" class="grid grid-cols-1 gap-8">
+
+        </div>
+    </div>
+    <section class="py-16" id="section0">
+        <div class="container bg-white rounded-md shadow-md mx-auto p-6 text-center">
+            <h2 class="text-3xl font-semibold mb-4">Special Offer</h2>
+            <p class="text-lg text-gray-900 mb-8">Book your bus tickets now and get 20% off on your next journey! Limited time offer, grab your tickets today.</p>
+        </div>
+    </section>
+    <!-- Testimonials Section -->
+<section class="py-16" id="section1">
+    <div class="container mx-auto text-center">
+        <h2 class="text-3xl font-semibold mb-8">What Our Customers Say</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-6 bg-white rounded-md shadow-md">
+                <p class="text-lg mb-4">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ut vehicula diam, at sodales turpis."</p>
+                <p class="text-gray-600">- John Doe</p>
+            </div>
+            <div class="p-6 bg-white rounded-md shadow-md">
+                <p class="text-lg mb-4">"Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."</p>
+                <p class="text-gray-600">- Jane Smith</p>
+            </div>
+            <div class="p-6 bg-white rounded-md shadow-md">
+                <p class="text-lg mb-4">"Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam."</p>
+                <p class="text-gray-600">- Michael Johnson</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Featured Destinations Section -->
+<section class="py-16" id="section2">
+    <div class="container mx-auto text-center">
+        <h2 class="text-3xl font-semibold mb-8">Featured Destinations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="p-6 rounded-md bg-white shadow-md">
+                <div class="flex justify-center items-center mb-4 rounded-md" style="height: 200px; overflow: hidden;"><img src="https://media.digitalnomads.world/wp-content/uploads/2021/02/20120605/goa.jpg" alt="Destination 1" class="mb-4 rounded-md"></div>
+                <h3 class="text-xl font-semibold mb-2">City A</h3>
+                <p class="text-gray-900">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
+            <div class="p-6 rounded-md bg-white shadow-md">
+                <div class="flex justify-center items-center mb-4 rounded-md" style="height: 200px; overflow: hidden;"><img src="https://imgnew.outlookindia.com/public/uploads/articles/2020/5/20/Tirupati-Temple_20180806.jpg" alt="Destination 2" class="mb-4 rounded-md"></div>
+                <h3 class="text-xl font-semibold mb-2">City B</h3>
+                <p class="text-gray-900">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+            </div>
+            <div class="p-6 rounded-md bg-white shadow-md">
+                <div class="flex justify-center items-center mb-4 rounded-md" style="height: 200px; overflow: hidden;"><img src="https://thedesigntourist.com/wp-content/uploads/2024/02/leh-ladakh-bike-trip.jpg" alt="Destination 3" class="mb-4 rounded-md"></div>
+                <h3 class="text-xl font-semibold mb-2">City C</h3>
+                <p class="text-gray-900">Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+            </div>
+            <div class="p-6 rounded-md bg-white shadow-md">
+                <div class="flex justify-center items-center mb-4 rounded-md" style="height: 200px; overflow: hidden;"><img src="https://lp-cms-production.imgix.net/2019-06/9483508eeee2b78a7356a15ed9c337a1-bengaluru-bangalore.jpg" alt="Destination 4" class="mb-4 rounded-md"></div>
+                <h3 class="text-xl font-semibold mb-2">City D</h3>
+                <p class="text-gray-900">Nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <footer id="footer" class="text-grey-800 py-8">
+    <div class="container mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">© 2022 Bus Tickets. All rights reserved.</div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-300">Privacy Policy</a>
+                <a href="#" class="hover:text-gray-300">Terms of Service</a>
+                <a href="#" class="hover:text-gray-300">FAQ</a>
+            </div>
+        </div>
+    </div>
+</footer>
+    <script>
+        document.getElementById("noBus").style.display = "none";
+
+        var totalPrice = 0;
+        let FromLoc = '';
+        let ToLoc = '';
+        let FromTime = '';
+        let ToTime = '';
+        let DateBook = '';
+        let UidPut = '';
+        let optionOfPayment = '';
+        let seatCount = '';
+        let BookedSeats = [];
+        let uniqueValues = [];
+        var selectedSeatsArray = [];
+        var allBusesData = []; // Variable to store all buses data
+
+        document.getElementById("AtleastMsg").style.display = "none";
+
+        // Fetch JSON data from the server
+        const url = 'https://orm-bub.mercury.infinity-api.net/api/v83/dynamic?table_structure=%7B%20%20%20%20%20%20%20%22columns%22%3A%20%5B%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22one%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22two%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22three%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22four%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22five%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22six%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22seven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eight%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22nine%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22ten%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eleven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22Integer%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22uid%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22domain_id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22created_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22updated_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%20%20%20%20%20%20%20%5D%2C%20%20%20%20%20%20%20%22indexes%22%3A%20%5B%5D%2C%20%20%20%20%20%20%20%22table_name%22%3A%20%22Buses%22%20%20%20%20%20%7D&visibility_status=company&sort_column=id&sort_direction=desc&offset=0&limit=100';
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1IjoiMjNlOGUzYWZiY2NlNDkyYTkzYTRiZTFiMjZjMmU3YWEiLCJkIjoiYzRlZDc1YjU0ZmNmNDc2OTgzMzJjODIxYzU1MDc1Y2QiLCJyIjoic2EiLCJwIjoiZnJlZSIsImEiOiJidWIiLCJsIjoidXMxIiwiYiI6ImdBQUFBQUJtU0ZibjN1VFZ4T29FWEZhd204dE9oUjVBaktrY3NXOEF4OEFQZElsOUxGSkViUW9sU2p6TGhUYXBTaWlkclhyT0sxcW5YWEpmV2h4SFBkY19wSFlGVk1MdWJkR0JaWlpHN2czYTBmSVNQQnNtOFQyVUM0UW5xSmRkVF9Pam52dHhkTmwtOXRleGZOdnlxQ3N3VkpCWG9MRDNHQ3MxSUFnRzM1cnNYNVFpM0F5VWN5WFVPZlRHMmtFMlBoSl9KZ29GdWRkaldvNU1WWUJQaVBCbG1MNzNlT19tODVrYnEwcjk4LXdNbTNGNDNlbTh1aUZldGtxNnUwRndXY01yRGhGV3RidndRQzEwNVpOY3JfOXNscmlFY2p3Rk5nPT0iLCJleHAiOjE3MTg2MDg4NzF9.yVuMLQblrydI1lOGgjCjIHScmfAfRZ3itzI9iKMn3l4';
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+
+        fetch(url, {
+            method: 'GET',
+            headers: headers
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                allBusesData = data; // Store all buses data
+
+                var allValues = [];
+                data.forEach(function (item) {
+                    allValues.push(item.eight, item.nine);
+                });
+                uniqueValues = Array.from(new Set(allValues));
+
+
+                // Get today's date in yyyy:mm:dd format
+                const today = new Date().toISOString().slice(0, 10).replace(/-/g, ':');
+
+                // Function to delete a record by its UID
+                async function deleteRecord(uid) {
+                    const url = `https://orm-bub.mercury.infinity-api.net/api/v83/dynamic/${uid}?table_structure=%7B%20%20%20%20%20%20%20%22columns%22%3A%20%5B%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22one%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22two%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22three%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22four%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22five%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22six%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22seven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eight%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22nine%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22ten%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eleven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22Integer%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22uid%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22domain_id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22created_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22updated_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%20%20%20%20%20%20%20%5D%2C%20%20%20%20%20%20%20%22indexes%22%3A%20%5B%5D%2C%20%20%20%20%20%20%20%22table_name%22%3A%20%22Buses%22%20%20%20%20%20%7D`; // Replace with your API endpoint
+                    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1IjoiMjNlOGUzYWZiY2NlNDkyYTkzYTRiZTFiMjZjMmU3YWEiLCJkIjoiYzRlZDc1YjU0ZmNmNDc2OTgzMzJjODIxYzU1MDc1Y2QiLCJyIjoic2EiLCJwIjoiZnJlZSIsImEiOiJidWIiLCJsIjoidXMxIiwiYiI6ImdBQUFBQUJtVkpHQ3Q2OTctaFhGVmJzUGRMLXNzaU02bDl1akF3SmtlZ2lPbVE2YjVZYkhzV1NfcGtqbkROX2VYekdqbUtHWmtpeDNfVUZ0VjhUR2dyeDI5UUpqOWVETUs2NFJTRjVabVRVUkJ1cy1kSVR5d25Jd1RMbkF3d1JjaHRqN2o2ekdpeGVLRUM3ZldCMHhQUmN6cUc4a2c1UHRiUnJ6WXliRXlFU1R2SS1PbTlVdGZtZmNCNG03ZEViNngxZjlTd1VzZHVQdXVDRVJRcXczVk5OMG5mR3lPTFA4Q0RwWGxKa29YMHRDeEF4Vm1fSkYtbUlDY1FYQks2VkczYWw0ZXBMMXB2ZEFlM2E1TE45LXdlOWt4N3RDRlBlbG9RPT0iLCJleHAiOjE3MTk0MTAzMDZ9.h2SZT0tVdJqUQz52aKEz3Ig6F053KDvReIYtjUedQDQ'; // Replace with your bearer token
+
+                    try {
+                        const response = await fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json' // You can adjust the content type as needed
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to delete record');
+                        }
+
+                        console.log(`Record with UID ${uid} deleted successfully`);
+                    } catch (error) {
+                        console.error(`Error deleting record with UID ${uid}:`, error);
+                    }
+                }
+
+                // Iterate over each record and delete the ones with dates older than today's date
+                data.forEach(item => {
+                    if (item.ten < today) {
+                        deleteRecord(item.uid);
+                    }
+                });
+
+                // displayFilteredData(data); // Display all buses data initially
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+
+        function displayFilteredData(filteredData) {
+            if(filteredData.length<3){
+                footer.classList.add('fixed', 'bottom-0', 'w-full');
+            }
+            var busgrid = document.getElementById('busgrid');
+            busgrid.innerHTML = ''; // Clear existing content
+
+            // Loop through each item
+            filteredData.forEach((item, index) => {
+                // Create busInfo HTML
+                let busInfo = `
+                <div class="container mx-auto w-3/5 mt-8 bg-white rounded-xl shadow-md overflow-hidden p-4 bus-card">
+        <div class="flex justify-between items-center px-24">
+            <div class="w-1/3">
+                <div class="text-sm text-gray-600 ">
+                    <p class="font-semibold text-lg text-gray-800">Sithara Travels</p>
+                    <p class="text-xs text-gray-700">${item.four}</p>
+                </div>
+            </div>
+                    <div class="w-2/3 text-center">
+                <div class="text-sm text-gray-600 flex items-center justify-between">
+                    <div>
+                        <p class="font-semibold text-lg text-gray-800">${item.six}</p>
+                        <p class="text-xs text-gray-700">${item.eight}</p>
+                    </div>
+                    <div class="text-2xl text-gray-600 mx-4">→</div>
+                    <div>
+                        <p class="font-semibold text-lg text-gray-800">${item.seven}</p>
+                        <p class="text-xs text-gray-700">${item.nine}</p>
+                    </div>
+                </div>
+            </div>
+                <div class="w-1/3 flex justify-end">
+                <div class="text-sm text-gray-600 ">
+                    <p class="text-xs text-gray-700">Starting At</p>
+                    <p class="font-semibold text-lg text-gray-800">₹ ${item.five}</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end mt-6">
+            <div class="w-1/3 flex justify-start items-center px-32"><span class="fa fa-star checked"> &nbsp;</span>4.3</div>
+        <div class="flex w-1/3 justify-center">
+            <div class="text-center">
+                <p class="text-lg font-semibold text-gray-800">${item.three}</p>
+                <p class="text-xs">  Seats Available</p>
+            </div>
+        </div>
+        
+        <div class="flex w-1/3 justify-end px-20">
+            <button class="font-bold px-2 rounded book-button hover:bg-gray-300" style="border:solid black 1px;">Show Seats</button>
+        </div></div>
+    </div>
+        `;
+                // Append busInfo to busgrid
+                busgrid.innerHTML += busInfo;
+            });
+
+            // Add event listeners to the buttons after they are all appended
+            const bookButtons = document.querySelectorAll('.book-button');
+            bookButtons.forEach((button, index) => {
+                button.addEventListener('click', () => {
+                    console.log(`Book button ${index} clicked`);
+                    console.log('Bus data:', filteredData[index]); // Log bus data
+                    if (filteredData[index].eleven == null) {
+                        BookedSeats = [];
+                    }
+                    else {
+                        BookedSeats = filteredData[index].eleven.split(",")
+                    };
+                    FromLoc = filteredData[index].eight;
+                    ToLoc = filteredData[index].nine;
+                    FromTime = filteredData[index].six;
+                    ToTime = filteredData[index].seven;
+                    DateBook = filteredData[index].ten;
+                    UidPut = filteredData[index].uid;
+                    seatCount = filteredData[index].three;
+                    console.log(BookedSeats, FromLoc, ToLoc, DateBook, UidPut, "seats selected")
+                    // Open modal here
+                    openModal(filteredData[index]);
+                    // You can also pass data to the modal based on the button clicked
+                    // For example: showModalContent(filteredData[index]);
+                });
+            });
+        }
+        var activeInputId;
+
+function setActiveInput(inputId) {
+    activeInputId = inputId;
+}
+
+function filterOptions(inputId) {
+    var input, filter, ul, li, i;
+    input = document.getElementById(inputId);
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("options");
+    li = ul.getElementsByTagName("li");
+    for (i = 0; i < li.length; i++) {
+        if (li[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+    if (filter === "") {
+        // ul.style.display = "none";
+        selectOption(event)
+    } else {
+        ul.style.display = "block";
+    }
+}
+
+function showAllOptions(inputId) {
+    var ul = document.getElementById("options");
+    ul.innerHTML = ''; // Clear previous options
+    // var options = ["Apple", "Orange", "Banana", "Pineapple", "Strawberry", "Grapes"];
+    uniqueValues.forEach(function(option) {
+        var li = document.createElement("li");
+        li.textContent = option;
+        ul.appendChild(li);
+    });
+    ul.style.display = "block";
+    setActiveInput(inputId);
+}
+
+function selectOption(event) {
+    var selectedOption = event.target;
+    if (selectedOption.tagName === 'LI') {
+        var input = document.getElementById(activeInputId);
+        input.value = selectedOption.innerHTML;
+        document.getElementById("options").style.display = "none";
+    }
+}
+
+document.addEventListener('click', function(event) {
+    var inputBox = document.getElementById("from");
+    var inputBo = document.getElementById("to");
+    var optionsList = document.getElementById("options");
+    if (event.target !== inputBox && event.target !== inputBo && event.target.parentNode !== optionsList) {
+        optionsList.style.display = "none";
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var ul = document.getElementById("options");
+    ul.addEventListener('click', selectOption);
+    window.addEventListener('scroll', closeOptions);
+});
+        // Function to open the modal
+        function openModal(busData) {
+            document.getElementById("PriceDiv").style.display = "none";
+            document.getElementById("selectedSeatsAndPriceDiv").style.display = "none";
+
+            var selectedSeats = ["A1", "B2", "C3", "D1"]
+            BookedSeatsFunction(BookedSeats);
+            // selectedSeatsArray=[];
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            BookingSeats();
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+
+        // function BackArrow(){
+        //     document.getElementById("SeatsModal").style.display = "block";
+        //     document.getElementById('userDetailsModal').classList.add('hidden');
+
+        // }
+
+        // Close modal when the user clicks on the close button (×)
+        document.querySelector('.close').addEventListener('click', closeModal);
+
+        // Close modal when the user clicks anywhere outside of the modal
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('myModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        todayDate();
+        function todayDate() {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            today = yyyy + '-' + mm + '-' + dd;
+            document.getElementById('date').value = today;
+        }
+
+        // Event listener for today button
+        document.getElementById('todayBtn').addEventListener('click', function () {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var yyyy = today.getFullYear();
+            today = yyyy + '-' + mm + '-' + dd;
+            document.getElementById('date').value = today;
+            Calling(event)
+        });
+
+        // Event listener for tomorrow button
+        document.getElementById('tomorrowBtn').addEventListener('click', function () {
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dd = String(tomorrow.getDate()).padStart(2, '0');
+            var mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            var yyyy = tomorrow.getFullYear();
+            tomorrow = yyyy + '-' + mm + '-' + dd;
+            document.getElementById('date').value = tomorrow;
+            Calling(event)
+        });
+
+        // Event listener for search button
+        // document.getElementById('searchBtn').addEventListener('click', 
+
+        function Calling(event) {
+            event.preventDefault(); // Prevent form submission
+
+            // Get selected options
+            var fromValue = document.getElementById('from').value;
+            var toValue = document.getElementById('to').value;
+            var dateValue = document.getElementById('date').value;
+            // console.log(dateValue);
+
+            if (fromValue == '') {
+                document.getElementById("from").style.border = "1px solid red";
+                return;
+            } else if (toValue == '') {
+                document.getElementById("from").style.border = "none";
+                document.getElementById("to").style.border = "1px solid red";
+                return;
+            } else {
+                document.getElementById("from").style.border = "none";
+                document.getElementById("to").style.border = "none";
+            }
+
+            document.getElementById("section0").style.display = "none";
+            document.getElementById("section1").style.display = "none";
+            document.getElementById("section2").style.display = "none";
+
+
+            // Function to change date format
+            function changeDateFormat(inputDate) {
+                var parts = inputDate.split('-');
+                return parts.join(':');
+            }
+
+            var formattedDate = changeDateFormat(dateValue);
+
+            // Filter JSON data based on selected options
+            var filteredData = allBusesData.filter(function (item) {
+                return item.eight === fromValue && item.nine === toValue && item.ten === formattedDate;
+                console.log(filteredData);
+            });
+            console.log(filteredData)
+            console.log(filteredData.length)
+            if (filteredData == '') {
+                document.getElementById("noBus").style.display = "block";
+                footer.classList.add('fixed', 'bottom-0', 'w-full');
+            }
+            else {
+                document.getElementById("noBus").style.display = "none";
+                footer.classList.remove('fixed', 'bottom-0', 'w-full');
+                footer.classList.add('mt-8');
+            }
+            // Display filtered data
+            displayFilteredData(filteredData);
+        };
+
+        function showPrice(event, price) {
+            var seat = event.currentTarget;
+            var popup = seat.querySelector('.popup');
+
+            // Check if the seat has the class bg-gray-400
+            if (!seat.classList.contains('bg-gray-400')) {
+                popup.textContent = 'Price: ' + price;
+                popup.style.display = 'block';
+            }
+        }
+
+        function hidePrice(event) {
+            var popup = event.currentTarget.querySelector('.popup');
+            popup.textContent = '';
+            popup.style.display = 'none';
+        }
+
+
+        function toggleSeat(event, seatId, seatPrice) {
+            var seat = document.getElementById(seatId);
+            if (seat.classList.contains('bg-gray-400')) {
+                return;
+            }
+            if (selectedSeatsArray.length >= 1) {
+                document.getElementById("AtleastMsg").style.display = "block";
+            }
+            document.getElementById("AtleastMsg").style.display = "none";
+
+            document.getElementById("PriceDiv").style.display = "block";
+            document.getElementById("selectedSeatsAndPriceDiv").style.display = "block";
+
+
+            if (seat.classList.contains('bg-gray-50')) {
+                // Check if the maximum number of seats has been reached
+                if (selectedSeatsArray.length >= 4) {
+                    alert("Sorry, Maximum 4 seats allowed per passenger");
+                    return; // Exit the function if the maximum limit is reached
+                }
+
+                seat.classList.remove('bg-gray-50');
+                seat.classList.add('bg-green-300'); // Change to selected color
+                selectedSeatsArray.push({ id: seatId, price: seatPrice }); // Add seat to selected seats array
+                console.log(selectedSeatsArray)
+            } else {
+                seat.classList.remove('bg-green-300'); // Revert to normal color
+                seat.classList.add('bg-gray-50');
+                // Remove seat from selected seats array
+                selectedSeatsArray = selectedSeatsArray.filter(function (seatObj) {
+                    return seatObj.id !== seatId;
+                });
+                console.log(selectedSeatsArray)
+            }
+
+            // Update selected seats and total price display
+            SelectedSeatsAndPriceDisplay();
+        }
+        function SelectedSeatsAndPriceDisplay() {
+
+            if (selectedSeatsArray.length < 1) {
+                console.log("Empty string");
+                document.getElementById("PriceDiv").style.display = "none";
+                document.getElementById("selectedSeatsAndPriceDiv").style.display = "none";
+            }
+
+            var selectedSeatsDiv = document.getElementById('selectedSeatsAndPriceDiv');
+            var totalPriceSpan = document.getElementById('totalPrice');
+            var totalPriceBookingSpan = document.getElementById('totalPriceBooking');
+            var PriceBookingSpan = document.getElementById('PriceBookingTwo');
+
+
+            var selectedSeatsString = "";
+            totalPrice = 0; // Reset total price
+
+
+            selectedSeatsArray.forEach(function (seatObj, index) {
+                selectedSeatsString += seatObj.id;
+                // BookedSeats += seatObj.id;
+
+                // console.log(BookedSeats);
+                if (index < selectedSeatsArray.length - 1) {
+                    selectedSeatsString += ", ";
+                }
+                totalPrice += parseInt(seatObj.price);
+            });
+
+            console.log(selectedSeatsString);
+            // Update the selected seats display
+            selectedSeatsDiv.innerHTML = '<p class="text-cyan-950">Selected Seats: ' + selectedSeatsString + '</p>';
+
+
+            // Update the total price display
+            totalPriceSpan.textContent = '₹ ' + totalPrice;
+
+            // Update the total price Booking page
+            totalPriceBookingSpan.textContent = '₹ ' + totalPrice;
+            PriceBookingSpan.textContent = '₹ ' + totalPrice;
+
+
+        }
+        function openUserDetailsModal(busDataBook) {
+            console.log(selectedSeatsArray.length)
+            document.getElementById("passengerone").style.display = "none";
+            document.getElementById("passengertwo").style.display = "none";
+            document.getElementById("passengerthree").style.display = "none";
+            document.getElementById("passengerfour").style.display = "none";
+            if (selectedSeatsArray.length == 1) {
+                document.getElementById("passengerone").style.display = "block";
+            }
+            else if (selectedSeatsArray.length == 2) {
+                document.getElementById("passengerone").style.display = "block";
+                document.getElementById("passengertwo").style.display = "block";
+            }
+            else if (selectedSeatsArray.length == 3) {
+                document.getElementById("passengerone").style.display = "block";
+                document.getElementById("passengertwo").style.display = "block";
+                document.getElementById("passengerthree").style.display = "block";
+
+            }
+            else {
+                document.getElementById("passengerone").style.display = "block";
+                document.getElementById("passengertwo").style.display = "block";
+                document.getElementById("passengerthree").style.display = "block";
+                document.getElementById("passengerfour").style.display = "block";
+
+            }
+            // let arrayPut=[...BookedSeats, ...arrayOfIds];
+            // console.log(arrayPut);
+
+            if (selectedSeatsArray.length < 1) {
+                document.getElementById("AtleastMsg").style.display = "block";
+                return;
+            }
+            const DetailsFrom = document.getElementById("DetailsFrom").innerHTML = FromLoc;
+            document.getElementById("DetailsTo").innerHTML = ToLoc;
+            document.getElementById("FromTime").innerHTML = FromTime;
+            document.getElementById("ToTime").innerHTML = ToTime;
+            document.getElementById('BookDate').innerHTML = DateBook;
+            // closeModal()
+            document.getElementById("myModal").style.display = "none";
+            // document.getElementById("SeatsModal").style.display = "none";
+            console.log(DetailsFrom, totalPrice, DateBook)
+            document.getElementById('userDetailsModal').classList.remove('hidden');
+        }
+
+        function closeUserDetailsModal() {
+            BookingSeats()
+            document.getElementById('userDetailsModal').classList.add('hidden');
+        }
+
+        function postData(event) {
+            console.log(selectedSeatsArray)
+            let arrayOfIds = selectedSeatsArray.map(obj => {
+                BookedSeats += `,${obj.id}`
+            });
+            console.log(BookedSeats)
+            // event.preventDefault();
+            console.log("Helloooo")
+            const UpdateSeats = {
+                "eleven": BookedSeats,
+                "three": seatCount - selectedSeatsArray.length
+            };
+
+            const data = {
+                "one": "TA898D8F",
+                "two": document.getElementById('name').value,
+                "three": document.getElementById('phone').value,
+                "four": document.getElementById('email').value,
+                "five": optionOfPayment,
+                "six": document.getElementById('gender').value,
+                "seven": DateBook,
+                "eight": totalPrice,
+                "nine": "Success"
+            };
+
+            const url = 'https://orm-bub.mercury.infinity-api.net/api/v83/dynamic?table_structure=%7B%20%20%20%20%20%20%20%22columns%22%3A%20%5B%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22one%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22two%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22three%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22four%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22five%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22six%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22seven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eight%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22nine%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22ten%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22Integer%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22uid%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22domain_id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22created_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22updated_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%20%20%20%20%20%20%20%5D%2C%20%20%20%20%20%20%20%22indexes%22%3A%20%5B%5D%2C%20%20%20%20%20%20%20%22table_name%22%3A%20%22bususers%22%20%20%20%20%20%7D';
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response:', data);
+                    updateData(UpdateSeats)
+                    closeUserDetailsModal();
+                    alert("Ticket booked successfully!");
+                    location.reload();
+                    // Handle success response here
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    // Handle error here
+                });
+
+        }
+
+
+        function updateData(dataToUpdate) {
+
+            const url = `https://orm-bub.mercury.infinity-api.net/api/v83/dynamic/${UidPut}?table_structure=%7B%20%20%20%20%20%20%20%22columns%22%3A%20%5B%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22one%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22two%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22three%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22four%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22five%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22six%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22seven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eight%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22nine%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22ten%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20false%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20300%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22eleven%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20%5B%5D%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22Integer%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22uid%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%2036%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22domain_id%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22String%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22created_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%2C%20%20%20%20%20%20%20%20%20%7B%20%20%20%20%20%20%20%20%20%20%20%22hide%22%3A%20true%2C%20%20%20%20%20%20%20%20%20%20%20%22size%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22nullable%22%3A%20null%2C%20%20%20%20%20%20%20%20%20%20%20%22column_name%22%3A%20%22updated_date%22%2C%20%20%20%20%20%20%20%20%20%20%20%22column_type%22%3A%20%22TIMESTAMP%22%2C%20%20%20%20%20%20%20%20%20%20%20%22enum_values%22%3A%20null%20%20%20%20%20%20%20%20%20%7D%20%20%20%20%20%20%20%5D%2C%20%20%20%20%20%20%20%22indexes%22%3A%20%5B%5D%2C%20%20%20%20%20%20%20%22table_name%22%3A%20%22Buses%22%20%20%20%20%20%7D`;
+            const requestOptions = {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToUpdate)
+            };
+
+            return fetch(url, requestOptions)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data updated successfully:', data);
+                    return data;
+                })
+                .catch(error => {
+                    console.error('There was a problem updating the data:', error);
+                });
+        }
+
+        var SeatsForBook = ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3", "D1", "D2", "D3", "E1", "E2", "E3", "F1", "F2", "F3", "U1", "U2", "U3", "U4", "U5", "U6", "U7", "U8", "U9", "U10", "U11", "U12"];
+
+        function BookingSeats() {
+            // Get the array of selected seats
+
+            // Iterate over each selected seat
+            SeatsForBook.forEach(function (seatId) {
+                // Find the corresponding seat element in the HTML
+                var seatElement = document.getElementById(seatId);
+
+                // If the seat element exists
+                if (seatElement) {
+                    selectedSeatsArray = [];
+                    // document.getElementById("PriceDiv").innerHTML='';
+                    // document.getElementById("PriceDiv").style.display = "none";
+                    // document.getElementById("selectedSeatsAndPriceDiv").innerHTML='';
+                    // document.getElementById("totalPriceBooking").innerHTML='';
+
+                    // Change its background color to green
+                    seatElement.classList.remove('bg-gray-400');
+                    seatElement.classList.remove('bg-green-300');
+                    seatElement.classList.add('bg-gray-50'); // Add your green color class here
+                }
+            });
+        }
+
+        function BookedSeatsFunction(databook) {
+            // Iterate over each selected seat
+            console.log(BookedSeats, "seats array")
+            databook.forEach(function (seatId) {
+                // Find the corresponding seat element in the HTML
+                var seatElement = document.getElementById(seatId);
+
+                // If the seat element exists
+                if (seatElement) {
+                    // Change its background color to green
+                    seatElement.classList.remove('bg-gray-50');
+                    seatElement.classList.add('bg-gray-400'); // Add your green color class here
+                    console.log("hello")
+                }
+            });
+
+        }
+
+        function openPaymentForm(event) {
+            event.preventDefault();
+            console.log(seatCount - selectedSeatsArray.length);
+            document.getElementById('paymentSection').style.display = 'block';
+            document.getElementById('ButtonPay').style.display = 'none';
+            document.getElementById('PriceBooking').style.display = 'none';
+        }
+
+        function showPaymentDetails(paymentOption) {
+            // Hide all payment details
+            optionOfPayment = paymentOption;
+            document.getElementById('creditCardDetails').style.display = 'none';
+            document.getElementById('debitCardDetails').style.display = 'none';
+            document.getElementById('upiDetails').style.display = 'none';
+
+            // Show the selected payment details
+            if (paymentOption === 'Credit Card') {
+                document.getElementById('creditCardDetails').style.display = 'block';
+            } else if (paymentOption === 'Debit Card') {
+                document.getElementById('debitCardDetails').style.display = 'block';
+            } else if (paymentOption === 'UPI') {
+                document.getElementById('upiDetails').style.display = 'block';
+            }
+        }
+
+        function processPayment() {
+            // Here you can add your logic to process the payment based on the selected option
+            console.log('Payment processed successfully!');
+            // You may redirect to a success page or display a success message
+        }
+
+        function HideModal() {
+            document.getElementById('myModal').style.display = 'block';
+            document.getElementById('userDetailsModal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
